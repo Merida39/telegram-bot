@@ -8,6 +8,8 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
+var version = "dev" // Значення підставляється через -ldflags при збірці
+
 func main() {
 	token := os.Getenv("TELE_TOKEN")
 	if token == "" {
@@ -28,6 +30,7 @@ func main() {
 		return c.Send("Ти написав: " + c.Text())
 	})
 
-	log.Println("Бот запущено...")
+	log.Printf("Бот запущено... Версія: %s\n", version)
 	bot.Start()
 }
+
