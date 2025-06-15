@@ -1,6 +1,6 @@
 module github.com/Merida39/telegram-bot
 
-go 1.19
+go 1.21
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
