@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: telegram-bot-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: telegram-bot
+          image: merida39/telegram-bot:latest
+          args: ["run", "one-time-task"]
+      restartPolicy: OnFailure

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegram-bot
+  labels:
+    app: telegram-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegram-bot
+  template:
+    metadata:
+      labels:
+        app: telegram-bot
+    spec:
+      containers:
+        - name: telegram-bot
+          image: merida39/telegram-bot:latest
+          ports:
+            - containerPort: 8080
+        - name: logger
+          image: busybox
+          command: ["sh", "-c", "tail -n+1 -F /var/log/app.log"]
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log
+      volumes:
+        - name: log-volume
+          emptyDir: {}

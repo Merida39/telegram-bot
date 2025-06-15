@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: telegram-bot-cron
+spec:
+  schedule: "0 0 * * *" # щодня опівночі
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: telegram-bot
+              image: merida39/telegram-bot:latest
+              args: ["run", "scheduled-task"]
+          restartPolicy: OnFailure
