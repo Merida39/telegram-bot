@@ -1,14 +1,6 @@
-replicaCount: 1
+repository: merida39/telegram-bot
+tag: v1.0.0
+arch: amd64
+TELE_TOKEN: test_token
 
-image:
-  repository: merida39/telegram-bot
-  tag: v1.0.0
-  arch: amd64
-  pullPolicy: IfNotPresent
-
-teleTokenSecretName: telegram-bot-secret
-
-service:
-  type: ClusterIP
-  port: 80
 
