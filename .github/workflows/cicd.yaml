@@ -44,8 +44,11 @@ jobs:
         git push || echo "Push failed"
 
     - name: Trigger ArgoCD sync (optional)
-      if: ${{ secrets.ARGOCD_WEBHOOK_URL != '' }}
+      if: ${{ env.ARGOCD_WEBHOOK_URL != '' }}
+      env:
+        ARGOCD_WEBHOOK_URL: ${{ secrets.ARGOCD_WEBHOOK_URL }}
       run: |
-        curl -X POST ${{ secrets.ARGOCD_WEBHOOK_URL }}
+        curl -X POST $ARGOCD_WEBHOOK_URL
+
 
 
