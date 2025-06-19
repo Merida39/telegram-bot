@@ -9,29 +9,34 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
 
+    env:
+      VERSION: v1.0.0-$(git rev-parse --short HEAD)
+      REGISTRY: ghcr.io/merida39
+      IMAGE: telegram-bot
+      ARCH: linux-amd64
+
     steps:
     - uses: actions/checkout@v3
 
-    - name: Log in to GitHub Container Registry
+    - name: Log in to GHCR with PAT
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: merida39
+        password: ${{ secrets.CR_PAT }}
 
-    - name: Build and push Docker image
+    - name: Build and push image with Makefile
       run: |
-        TAG=v1.0.0-$(git rev-parse --short HEAD)-linux-amd64
-        docker build --platform linux/amd64 -t ghcr.io/merida39/telegram-bot:${TAG} .
-        docker push ghcr.io/merida39/telegram-bot:${TAG}
+        make build VERSION=${VERSION} ARCH=${ARCH}
+        make push VERSION=${VERSION} ARCH=${ARCH}
 
-    - name: Update helm/values.yaml
+    - name: Update Helm values.yaml
       run: |
-        yq e -i ".image.tag = \"${TAG}\"" helm/values.yaml
+        yq e -i ".image.tag = \"${VERSION}-${ARCH}\"" helm/values.yaml
         git config user.name "github-actions"
         git config user.email "actions@github.com"
         git add helm/values.yaml
-        git commit -m "Update image tag to ${TAG}" || echo "No changes"
+        git commit -m "Update image tag to ${VERSION}-${ARCH}" || echo "No changes to commit"
         git push origin develop
 
     - name: Sync ArgoCD
@@ -41,4 +46,5 @@ jobs:
       run: |
         argocd login $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --grpc-web
         argocd app sync telegram-bot
+
 
