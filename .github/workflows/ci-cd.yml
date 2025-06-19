@@ -30,12 +30,13 @@ jobs:
 
     - name: Update helm/values.yaml with new image tag
       run: |
-        yq e -i ".image.tag = \"${VERSION}-linux-amd64\"" helm/values.yaml
+        yq e -i ".image.tag = \"${VERSION}-linux-amd64\"" helm/telegram-bot/values.yaml
         git config user.name "github-actions"
         git config user.email "actions@github.com"
-        git add helm/values.yaml
+        git add helm/telegram-bot/values.yaml
         git commit -m "Update image tag to ${VERSION}-linux-amd64" || echo "No changes to commit"
         git push origin develop
+
 
     - name: Sync ArgoCD deployment
       env:
