@@ -1,13 +1,13 @@
 <<<<<<< HEAD
 repository: merida39/telegram-bot
-tag: "v1.0.0-a879456-linux-amd64"
+tag: "v1.0.0-055cb5a-linux-amd64"
 arch: amd64
 TELE_TOKEN: test_token
 =======
 image:
   registry: "ghcr.io"
   repository: "merida39/telegram-bot"
-  tag: "v1.0.0-d399837"
+  tag: "v1.0.0-055cb5a-linux-amd64"
   os: linux
   arch: amd64
 
