@@ -13,39 +13,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and Push Docker image
-      run: |
-        VERSION="v1.0.0-$(git rev-parse --short HEAD)"
-        make image VERSION=$VERSION
+      - name: Build and Push Docker image
+        run: |
+          VERSION="v1.0.0-$(git rev-parse --short HEAD)"
+          ARCH="linux-amd64"
+          IMAGE="ghcr.io/merida39/telegram-bot:${VERSION}-${ARCH}"
+          echo "Building image: $IMAGE"
+          docker build --build-arg VERSION=$VERSION -t $IMAGE .
+          docker push $IMAGE
 
-    - name: Update Helm values.yaml
-      run: |
-        VERSION="v1.0.0-$(git rev-parse --short HEAD)"
-        sed -i "s/tag: .*/tag: \"${VERSION}\"/" helm/telegram-bot/values.yaml
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
-        git commit -am "ci: update Helm tag to ${VERSION}" || echo "No changes"
-        git push || echo "Push failed"
+      - name: Update Helm values.yaml
+        run: |
+          VERSION="v1.0.0-$(git rev-parse --short HEAD)"
+          ARCH="linux-amd64"
+          TAG="${VERSION}-${ARCH}"
+          sed -i "s/tag: .*/tag: \"${TAG}\"/" helm/telegram-bot/values.yaml
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git commit -am "ci: update Helm tag to ${TAG}" || echo "No changes"
+          git push || echo "Push failed"
 
-    - name: Trigger ArgoCD sync (optional)
-      if: ${{ env.ARGOCD_WEBHOOK_URL != '' }}
-      env:
-        ARGOCD_WEBHOOK_URL: ${{ secrets.ARGOCD_WEBHOOK_URL }}
-      run: |
-        curl -X POST $ARGOCD_WEBHOOK_URL
+      - name: Trigger ArgoCD sync (optional)
+        if: ${{ env.ARGOCD_WEBHOOK_URL != '' }}
+        env:
+          ARGOCD_WEBHOOK_URL: ${{ secrets.ARGOCD_WEBHOOK_URL }}
+        run: |
+          curl -X POST $ARGOCD_WEBHOOK_URL
+
 
 
 
