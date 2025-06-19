@@ -1,0 +1,43 @@
+name: CI/CD Telegram Bot
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      run: |
+        TAG=v1.0.0-$(git rev-parse --short HEAD)-linux-amd64
+        docker build --platform linux/amd64 -t ghcr.io/Merida39/telegram-bot:${TAG} .
+        docker push ghcr.io/Merida39/telegram-bot:${TAG}
+
+    - name: Update helm/values.yaml
+      run: |
+        yq e -i ".image.tag = \"${TAG}\"" helm/values.yaml
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add helm/values.yaml
+        git commit -m "Update image tag to ${TAG}" || echo "No changes"
+        git push origin develop
+
+    - name: Sync ArgoCD
+      env:
+        ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+        ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+      run: |
+        argocd login $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --grpc-web
+        argocd app sync telegram-bot
