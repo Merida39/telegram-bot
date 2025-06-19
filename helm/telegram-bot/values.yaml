@@ -1,7 +1,7 @@
 image:
   registry: "ghcr.io"
   repository: "merida39/telegram-bot"
-  tag: "v1.0.0-<gitsha>"
+  tag: "v1.0.0-3c7d62c-linux-amd64"
   os: linux
   arch: amd64
 
