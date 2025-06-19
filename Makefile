@@ -1,6 +1,7 @@
 REGISTRY ?= ghcr.io/merida39
 IMAGE ?= telegram-bot
 VERSION ?= dev
+ARCH ?= linux-amd64
 
 build:
 	docker build -t $(REGISTRY)/$(IMAGE):$(VERSION) --build-arg VERSION=$(VERSION) .
