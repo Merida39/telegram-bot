@@ -49,9 +49,6 @@ jobs:
         argocd app sync telegram-bot
 
 
-      .
-
-
 
 
 
