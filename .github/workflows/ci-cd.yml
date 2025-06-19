@@ -6,7 +6,7 @@ on:
       - develop
 
 jobs:
-  build_and_push:
+  build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,8 +25,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        make build VERSION=${VERSION} ARCH=linux-amd64
-        make push VERSION=${VERSION} ARCH=linux-amd64
+        docker build --platform linux/amd64 -t ghcr.io/merida39/telegram-bot:${VERSION}-linux-amd64 --build-arg VERSION=${VERSION} .
+        docker push ghcr.io/merida39/telegram-bot:${VERSION}-linux-amd64
 
     - name: Update helm/values.yaml with new image tag
       run: |
@@ -37,8 +37,7 @@ jobs:
         git commit -m "Update image tag to ${VERSION}-linux-amd64" || echo "No changes to commit"
         git push origin develop
 
-
-    - name: Sync ArgoCD deployment
+    - name: Deploy with ArgoCD
       env:
         ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
         ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
@@ -48,6 +47,7 @@ jobs:
         sudo mv argocd-linux-amd64 /usr/local/bin/argocd
         argocd login $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --grpc-web
         argocd app sync telegram-bot
+
 
     
 
