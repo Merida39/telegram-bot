@@ -22,8 +22,8 @@ jobs:
     - name: Build and push Docker image
       run: |
         TAG=v1.0.0-$(git rev-parse --short HEAD)-linux-amd64
-        docker build --platform linux/amd64 -t ghcr.io/Merida39/telegram-bot:${TAG} .
-        docker push ghcr.io/Merida39/telegram-bot:${TAG}
+        docker build --platform linux/amd64 -t ghcr.io/merida39/telegram-bot:${TAG} .
+        docker push ghcr.io/merida39/telegram-bot:${TAG}
 
     - name: Update helm/values.yaml
       run: |
@@ -41,3 +41,4 @@ jobs:
       run: |
         argocd login $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --grpc-web
         argocd app sync telegram-bot
+
