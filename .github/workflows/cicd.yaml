@@ -1,3 +1,4 @@
+
 name: CI/CD Telegram Bot
 
 on:
@@ -27,13 +28,13 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and Push Docker image
-  run: |
-    VERSION="v1.0.0-$(git rev-parse --short HEAD)"
-    OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-    IMAGE="ghcr.io/${OWNER}/telegram-bot:${VERSION}-linux-amd64"
-    echo "Building image: $IMAGE"
-    docker build --build-arg VERSION=$VERSION -t $IMAGE .
-    docker push $IMAGE
+      run: |
+        VERSION="v1.0.0-$(git rev-parse --short HEAD)"
+        OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+        IMAGE="ghcr.io/${OWNER}/telegram-bot:${VERSION}-linux-amd64"
+        echo "Building image: $IMAGE"
+        docker build --build-arg VERSION=$VERSION -t $IMAGE .
+        docker push $IMAGE
 
     - name: Update Helm values.yaml
       run: |
