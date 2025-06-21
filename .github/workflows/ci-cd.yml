@@ -1,0 +1,57 @@
+name: CI/CD Telegram Bot
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Get short git hash and set VERSION env variable
+      run: echo "VERSION=v1.0.0-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: merida39
+        password: ${{ secrets.CR_PAT }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build --platform linux/amd64 -t ghcr.io/merida39/telegram-bot:${VERSION}-linux-amd64 --build-arg VERSION=${VERSION} .
+        docker push ghcr.io/merida39/telegram-bot:${VERSION}-linux-amd64
+
+    - name: Update helm/values.yaml with new image tag
+      run: |
+        yq e -i ".image.tag = \"${VERSION}-linux-amd64\"" helm/telegram-bot/values.yaml
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add helm/telegram-bot/values.yaml
+        git commit -m "Update image tag to ${VERSION}-linux-amd64" || echo "No changes to commit"
+        git push origin develop
+
+    - name: Deploy with ArgoCD
+      env:
+        ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+        ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+      run: |
+        curl -sLO https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        chmod +x argocd-linux-amd64
+        sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+        argocd login $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --grpc-web
+        argocd app sync telegram-bot
+
+
+    
+
+
+
+
+
